@@ -243,6 +243,58 @@
     @media (min-width: 700px) and (min-height: 720px) { .game { max-width: 640px; } .timer strong { font-size: 1.7rem; } .status { font-size: .95rem; } .feedback { font-size: .95rem; } .input { font-size: 1.75rem; } .key { font-size: 2.35rem; } .reset { font-size: 1.08rem; } }
     /* end-browser-scale-fix */
 
+    /* mobile-layout-fix */
+    @media (max-width: 520px) {
+      html, body { width: 100%; min-height: 100svh; overflow: hidden; }
+      body { align-items: stretch; justify-content: center; padding: env(safe-area-inset-top) 8px env(safe-area-inset-bottom); }
+      .game { height: 100svh; max-width: 100%; width: 100%; grid-template-rows: 36px minmax(0, 1fr) minmax(188px, 42svh) minmax(38px, 8svh); padding: 5px 0 0; }
+      .topbar { min-height: 32px; padding: 0; }
+      .timer { min-width: 92px; padding: 6px 8px; }
+      .timer strong { font-size: 1.25rem; }
+      .stage { gap: 5px; grid-template-rows: minmax(0, 1fr) auto; padding-bottom: 5px; }
+      .numbers { min-height: 118px; padding: 5px; }
+      .current-frame { height: calc((100% - 5px) / 2); left: 5px; right: 5px; top: 5px; }
+      .number-reel { gap: 5px; height: 100%; }
+      .number-reel.extra { height: calc(150% + 5px); }
+      .number-reel.roll { transform: translateY(calc((-100% + 5px) / 3)); }
+      .number-card { padding: 0 6px; }
+      .number-card span { display: none; }
+      .number-card strong, .number-card.current strong { font-size: clamp(1.7rem, 13vw, 2.35rem); padding-top: 0; }
+      .panel { gap: 4px; padding: 6px 8px; }
+      .status, .feedback { font-size: .76rem; }
+      .input { font-size: clamp(1rem, 5.6vw, 1.45rem); min-height: 34px; padding: 3px 6px; }
+      .keyboard { gap: 0; grid-template-rows: repeat(4, 1fr); min-height: 0; }
+      .key { font-size: clamp(1.35rem, 9vw, 2.05rem); min-height: 0; }
+      .reset { font-size: .95rem; min-height: 0; padding: 0 8px; }
+      .rules-tab { min-height: 34px; right: 10px; top: 10px; }
+      .rules-panel { inset: 10px; padding: 42px 14px 14px; }
+      .rules-panel p { font-size: .84rem; line-height: 1.45; }
+    }
+    @media (max-width: 380px) and (max-height: 700px) {
+      .game { grid-template-rows: 32px minmax(0, 1fr) minmax(164px, 41svh) minmax(34px, 8svh); }
+      .topbar { min-height: 28px; }
+      .timer strong { font-size: 1.1rem; }
+      .numbers { min-height: 104px; padding: 4px; }
+      .current-frame { height: calc((100% - 4px) / 2); left: 4px; right: 4px; top: 4px; }
+      .number-reel { gap: 4px; }
+      .number-reel.extra { height: calc(150% + 4px); }
+      .number-reel.roll { transform: translateY(calc((-100% + 4px) / 3)); }
+      .number-card strong, .number-card.current strong { font-size: clamp(1.45rem, 12vw, 2rem); }
+      .panel { padding: 5px 7px; }
+      .input { min-height: 30px; }
+      .key { font-size: clamp(1.15rem, 8vw, 1.75rem); }
+    }
+    /* end-mobile-layout-fix */
+
+    /* disable-long-press-selection */
+    html, body, .game, .overlay, .start-overlay, button, .number-card, .input, .status, .feedback, .timer, .rules-panel {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    ::selection { background: transparent; }
+    /* end-disable-long-press-selection */
+
   </style>
 </head>
 <body>
@@ -319,6 +371,8 @@
     function finishGame() { isPlaying = false; cancelAnimationFrame(timerFrame); finishedAt = performance.now(); const elapsed = (finishedAt - startedAt) / 1000; timerEl.textContent = elapsed.toFixed(2); resultTimeEl.textContent = elapsed.toFixed(2) + "秒"; resultDetailEl.textContent = "30問クリア / 3段階出題"; overlay.classList.add("show"); againButton.focus(); }
     function resetGame() { cancelAnimationFrame(timerFrame); questionPool = buildQuestionPool(); questions = buildQuestions(); currentIndex = 0; inputValue = ""; startedAt = 0; finishedAt = 0; isPlaying = false; locked = true; gameStarted = false; timerEl.textContent = "0.00"; feedbackEl.textContent = "素因数を入力"; feedbackEl.className = "feedback"; overlay.classList.remove("show"); rulesPanel.classList.remove("show"); rulesPanel.setAttribute("aria-hidden", "true"); startOverlay.classList.add("show"); showWaitingScreen(); }
     function bindKey(button) { const key = button.dataset.key; button.addEventListener("pointerdown", (event) => { event.preventDefault(); handleKey(key); }); button.addEventListener("click", (event) => { event.preventDefault(); if (event.detail === 0) handleKey(key); }); }
+    document.addEventListener("contextmenu", (event) => event.preventDefault());
+    document.addEventListener("selectstart", (event) => event.preventDefault());
     document.querySelectorAll("[data-key]").forEach(bindKey);
     startButton.addEventListener("click", startGame);
     rulesTab.addEventListener("click", () => { rulesPanel.classList.add("show"); rulesPanel.setAttribute("aria-hidden", "false"); });
