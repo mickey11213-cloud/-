@@ -295,6 +295,33 @@
     ::selection { background: transparent; }
     /* end-disable-long-press-selection */
 
+    /* last-question-align-fix */
+    .number-reel { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+    .number-reel.extra { grid-template-rows: repeat(3, minmax(0, 1fr)); }
+    .number-card { height: auto; }
+    /* end-last-question-align-fix */
+
+    /* strong-disable-selection */
+    * {
+      -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    }
+    html, body, body *, .game, .game *, .overlay, .overlay *, .start-overlay, .start-overlay * {
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+      -webkit-user-drag: none !important;
+    }
+    .number-card, .number-card *, .input, .input *, .timer, .timer *, .key, .reset {
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+    }
+    ::selection { background: transparent !important; color: inherit !important; }
+    ::-moz-selection { background: transparent !important; color: inherit !important; }
+    /* end-strong-disable-selection */
+
   </style>
 </head>
 <body>
@@ -371,8 +398,12 @@
     function finishGame() { isPlaying = false; cancelAnimationFrame(timerFrame); finishedAt = performance.now(); const elapsed = (finishedAt - startedAt) / 1000; timerEl.textContent = elapsed.toFixed(2); resultTimeEl.textContent = elapsed.toFixed(2) + "秒"; resultDetailEl.textContent = "30問クリア / 3段階出題"; overlay.classList.add("show"); againButton.focus(); }
     function resetGame() { cancelAnimationFrame(timerFrame); questionPool = buildQuestionPool(); questions = buildQuestions(); currentIndex = 0; inputValue = ""; startedAt = 0; finishedAt = 0; isPlaying = false; locked = true; gameStarted = false; timerEl.textContent = "0.00"; feedbackEl.textContent = "素因数を入力"; feedbackEl.className = "feedback"; overlay.classList.remove("show"); rulesPanel.classList.remove("show"); rulesPanel.setAttribute("aria-hidden", "true"); startOverlay.classList.add("show"); showWaitingScreen(); }
     function bindKey(button) { const key = button.dataset.key; button.addEventListener("pointerdown", (event) => { event.preventDefault(); handleKey(key); }); button.addEventListener("click", (event) => { event.preventDefault(); if (event.detail === 0) handleKey(key); }); }
+    function clearTextSelection() { const selection = window.getSelection && window.getSelection(); if (selection && selection.rangeCount) selection.removeAllRanges(); }
     document.addEventListener("contextmenu", (event) => event.preventDefault());
-    document.addEventListener("selectstart", (event) => event.preventDefault());
+    document.addEventListener("selectstart", (event) => { event.preventDefault(); clearTextSelection(); });
+    document.addEventListener("selectionchange", clearTextSelection);
+    document.addEventListener("touchstart", clearTextSelection, { passive: true });
+    document.addEventListener("touchend", clearTextSelection, { passive: true });
     document.querySelectorAll("[data-key]").forEach(bindKey);
     startButton.addEventListener("click", startGame);
     rulesTab.addEventListener("click", () => { rulesPanel.classList.add("show"); rulesPanel.setAttribute("aria-hidden", "false"); });
