@@ -236,6 +236,13 @@
     .topbar { justify-content: flex-end; }
     /* end-hide-top-title */
 
+    /* browser-scale-fix */
+    body { padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
+    .game { max-width: min(96vw, 640px); width: min(96vw, 640px); }
+    @media (max-width: 520px) { .game { max-width: 100%; width: 100%; } }
+    @media (min-width: 700px) and (min-height: 720px) { .game { max-width: 640px; } .timer strong { font-size: 1.7rem; } .status { font-size: .95rem; } .feedback { font-size: .95rem; } .input { font-size: 1.75rem; } .key { font-size: 2.35rem; } .reset { font-size: 1.08rem; } }
+    /* end-browser-scale-fix */
+
   </style>
 </head>
 <body>
