@@ -6,7 +6,7 @@
   <title>二重素因数分解</title>
   <style>
     :root { color-scheme: light; --bg: #f6f3ec; --ink: #17212b; --muted: #687180; --panel: #ffffff; --line: #d8d1c3; --accent: #2457d6; --ok: #0f8f72; --bad: #d64d3f; --key: #263342; --shadow: 0 12px 28px rgba(24,31,42,.12); }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; }
     body { align-items: center; background: linear-gradient(135deg, rgba(15,143,114,.14), transparent 34%), linear-gradient(315deg, rgba(36,87,214,.14), transparent 35%), var(--bg); color: var(--ink); display: flex; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; justify-content: center; min-height: 100svh; overflow: hidden; padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom); }
     .game { display: grid; grid-template-rows: auto 1fr auto auto; gap: 10px; height: min(100svh, 820px); max-width: 430px; padding: 14px 0; width: 100%; }
@@ -286,14 +286,6 @@
     }
     /* end-mobile-layout-fix */
 
-    /* disable-long-press-selection */
-    html, body, .game, .overlay, .start-overlay, button, .number-card, .input, .status, .feedback, .timer, .rules-panel {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    ::selection { background: transparent; }
-    /* end-disable-long-press-selection */
 
     /* last-question-align-fix */
     .number-reel { grid-template-rows: repeat(2, minmax(0, 1fr)); }
@@ -301,26 +293,6 @@
     .number-card { height: auto; }
     /* end-last-question-align-fix */
 
-    /* strong-disable-selection */
-    * {
-      -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    }
-    html, body, body *, .game, .game *, .overlay, .overlay *, .start-overlay, .start-overlay * {
-      -webkit-touch-callout: none !important;
-      -webkit-user-select: none !important;
-      -moz-user-select: none !important;
-      -ms-user-select: none !important;
-      user-select: none !important;
-      -webkit-user-drag: none !important;
-    }
-    .number-card, .number-card *, .input, .input *, .timer, .timer *, .key, .reset {
-      -webkit-touch-callout: none !important;
-      -webkit-user-select: none !important;
-      user-select: none !important;
-    }
-    ::selection { background: transparent !important; color: inherit !important; }
-    ::-moz-selection { background: transparent !important; color: inherit !important; }
-    /* end-strong-disable-selection */
 
     /* reliable-fast-tap */
     .keyboard, .keyboard *, .key {
@@ -332,7 +304,7 @@
 
     /* tight-keyboard-hitbox */
     .keyboard { border: 0; overflow: hidden; }
-    .key { margin: 0; outline: 0; }
+    .key { margin: 0; }
     /* end-tight-keyboard-hitbox */
 
 
@@ -348,6 +320,13 @@
     @media (max-height: 700px) { .game { grid-template-rows: 34px minmax(0, 1fr) minmax(206px, 50svh); padding-top: 4px; } .topbar { min-height: 30px; padding-bottom: 4px; } .top-reset { font-size: .74rem; padding: 0 9px; } }
     @media (max-height: 600px) { .game { grid-template-rows: 32px minmax(0, 1fr) minmax(186px, 50svh); } .topbar { min-height: 28px; } .top-reset { font-size: .7rem; padding: 0 8px; } }
     /* end-restart-top-keyboard-fill */
+
+
+    /* focus-outline-reset */
+    *:focus {
+      outline: none;
+    }
+    /* end-focus-outline-reset */
 
   </style>
 </head>
@@ -432,12 +411,6 @@
     function submitKeyboardKey(key) { if (!key) return; handleKey(key); }
     function bindKeyboardSurface() { const keyboard = document.querySelector(".keyboard"); keyboard.addEventListener("touchstart", (event) => { event.preventDefault(); lastTouchAt = performance.now(); for (const touch of event.changedTouches) submitKeyboardKey(keyFromPoint(touch.clientX, touch.clientY)); }, { passive: false }); keyboard.addEventListener("pointerdown", (event) => { if (event.pointerType === "touch" || performance.now() - lastTouchAt < 350) { event.preventDefault(); return; } event.preventDefault(); submitKeyboardKey(keyFromPoint(event.clientX, event.clientY)); }, { passive: false }); keyboard.addEventListener("click", (event) => { event.preventDefault(); }, { passive: false }); }
     function bindKey(button) { button.addEventListener("click", (event) => event.preventDefault(), { passive: false }); }
-    function clearTextSelection() { const selection = window.getSelection && window.getSelection(); if (selection && selection.rangeCount) selection.removeAllRanges(); }
-    document.addEventListener("contextmenu", (event) => event.preventDefault());
-    document.addEventListener("selectstart", (event) => { event.preventDefault(); clearTextSelection(); });
-    document.addEventListener("selectionchange", clearTextSelection);
-    document.addEventListener("touchstart", clearTextSelection, { passive: true });
-    document.addEventListener("touchend", clearTextSelection, { passive: true });
     document.querySelectorAll("[data-key]").forEach(bindKey);
     bindKeyboardSurface();
     startButton.addEventListener("click", startGame);
