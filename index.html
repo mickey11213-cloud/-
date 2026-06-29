@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>二重素因数分解</title>
   <style>
     :root { color-scheme: light; --bg: #f6f3ec; --ink: #17212b; --muted: #687180; --panel: #ffffff; --line: #d8d1c3; --accent: #2457d6; --ok: #0f8f72; --bad: #d64d3f; --key: #263342; --shadow: 0 12px 28px rgba(24,31,42,.12); }
@@ -322,6 +322,14 @@
     ::-moz-selection { background: transparent !important; color: inherit !important; }
     /* end-strong-disable-selection */
 
+    /* reliable-fast-tap */
+    .keyboard, .keyboard *, .key {
+      touch-action: none !important;
+      -ms-touch-action: none !important;
+    }
+    .key { cursor: pointer; }
+    /* end-reliable-fast-tap */
+
   </style>
 </head>
 <body>
@@ -379,6 +387,8 @@
     let inputQueue = [];
     let processingInputQueue = false;
     let lastTouchAt = 0;
+    let lastKeyboardEventAt = 0;
+    let lastKeyboardKey = "";
     function isPrime(value) { if (value < 2) return false; if (value === 2) return true; if (value % 2 === 0) return false; const limit = Math.floor(Math.sqrt(value)); for (let divisor = 3; divisor <= limit; divisor += 2) { if (value % divisor === 0) return false; } return true; }
     function factorize(value) { const factors = []; let rest = value; for (let divisor = 2; divisor <= rest; divisor += 1) { while (rest % divisor === 0) { factors.push(divisor); rest = rest / divisor; } } return factors; }
     function buildQuestionPool() { const pool = []; for (let value = minNumber; value <= maxNumber; value += 1) { if (isPrime(value)) continue; const pFactors = factorize(value); if (pFactors.length < 2) continue; const n2 = Number(pFactors.map(String).join("")); if (n2 <= 9 || n2 >= 10000) continue; if (isPrime(n2)) continue; const qFactors = factorize(n2); if (qFactors.length < 2) continue; pool.push({ value, pFactors, n2, factors: qFactors, answerLength: qFactors.map(String).join("").length }); } return pool; }
@@ -402,7 +412,10 @@
     async function advanceQuestion() { if (locked || currentIndex >= totalQuestions) return; locked = true; feedbackEl.textContent = "正解"; feedbackEl.className = "feedback ok"; renderReel(true); await rollReel(); currentIndex += 1; if (currentIndex >= totalQuestions) finishGame(); else showQuestion(); locked = false; }
     function finishGame() { isPlaying = false; cancelAnimationFrame(timerFrame); finishedAt = performance.now(); const elapsed = (finishedAt - startedAt) / 1000; timerEl.textContent = elapsed.toFixed(2); resultTimeEl.textContent = elapsed.toFixed(2) + "秒"; resultDetailEl.textContent = "30問クリア / 3段階出題"; overlay.classList.add("show"); againButton.focus(); }
     function resetGame() { cancelAnimationFrame(timerFrame); questionPool = buildQuestionPool(); questions = buildQuestions(); currentIndex = 0; inputValue = ""; inputQueue = []; processingInputQueue = false; startedAt = 0; finishedAt = 0; isPlaying = false; locked = true; gameStarted = false; timerEl.textContent = "0.00"; feedbackEl.textContent = "素因数を入力"; feedbackEl.className = "feedback"; overlay.classList.remove("show"); rulesPanel.classList.remove("show"); rulesPanel.setAttribute("aria-hidden", "true"); startOverlay.classList.add("show"); showWaitingScreen(); }
-    function bindKey(button) { const key = button.dataset.key; button.addEventListener("touchstart", (event) => { event.preventDefault(); lastTouchAt = performance.now(); handleKey(key); }, { passive: false }); button.addEventListener("pointerdown", (event) => { event.preventDefault(); if (event.pointerType === "touch") return; handleKey(key); }); button.addEventListener("click", (event) => { event.preventDefault(); if (performance.now() - lastTouchAt > 450 && event.detail === 0) handleKey(key); }); }
+    function keyFromPoint(x, y) { const element = document.elementFromPoint(x, y); const keyButton = element && element.closest ? element.closest("[data-key]") : null; return keyButton ? keyButton.dataset.key : ""; }
+    function submitKeyboardKey(key, eventTime) { if (!key) return; if (key === lastKeyboardKey && eventTime - lastKeyboardEventAt < 18) return; lastKeyboardKey = key; lastKeyboardEventAt = eventTime; handleKey(key); }
+    function bindKeyboardSurface() { const keyboard = document.querySelector(".keyboard"); keyboard.addEventListener("pointerdown", (event) => { event.preventDefault(); keyboard.setPointerCapture?.(event.pointerId); submitKeyboardKey(keyFromPoint(event.clientX, event.clientY), performance.now()); }, { passive: false }); keyboard.addEventListener("touchstart", (event) => { if (window.PointerEvent) return; event.preventDefault(); lastTouchAt = performance.now(); for (const touch of event.changedTouches) submitKeyboardKey(keyFromPoint(touch.clientX, touch.clientY), performance.now()); }, { passive: false }); keyboard.addEventListener("click", (event) => { event.preventDefault(); }, { passive: false }); }
+    function bindKey(button) { button.addEventListener("click", (event) => event.preventDefault(), { passive: false }); }
     function clearTextSelection() { const selection = window.getSelection && window.getSelection(); if (selection && selection.rangeCount) selection.removeAllRanges(); }
     document.addEventListener("contextmenu", (event) => event.preventDefault());
     document.addEventListener("selectstart", (event) => { event.preventDefault(); clearTextSelection(); });
@@ -410,6 +423,7 @@
     document.addEventListener("touchstart", clearTextSelection, { passive: true });
     document.addEventListener("touchend", clearTextSelection, { passive: true });
     document.querySelectorAll("[data-key]").forEach(bindKey);
+    bindKeyboardSurface();
     startButton.addEventListener("click", startGame);
     rulesTab.addEventListener("click", () => { rulesPanel.classList.add("show"); rulesPanel.setAttribute("aria-hidden", "false"); });
     rulesClose.addEventListener("click", () => { rulesPanel.classList.remove("show"); rulesPanel.setAttribute("aria-hidden", "true"); });
