@@ -335,14 +335,27 @@
     .key { margin: 0; outline: 0; }
     /* end-tight-keyboard-hitbox */
 
+
+    /* restart-top-keyboard-fill */
+    .game { grid-template-rows: 40px minmax(0, 1fr) minmax(226px, 50svh); gap: 0; height: 100svh; padding: 6px 0 0; }
+    .topbar { align-items: center; display: flex; justify-content: space-between; min-height: 36px; padding: 0 0 6px; }
+    .top-reset { align-self: stretch; background: #263342; border: 0; border-radius: 8px; color: #f8fafc; font-size: .86rem; font-weight: 900; letter-spacing: 0; min-height: 0; padding: 0 12px; width: auto; }
+    .timer { align-self: stretch; display: flex; align-items: center; }
+    .keyboard { align-self: stretch; display: grid; gap: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); min-height: 0; }
+    .key { min-height: 0; }
+    .keyboard .key, .key:nth-child(1), .key:nth-child(3), .key:nth-child(10), .key:nth-child(12) { border-radius: 0; }
+    @media (max-width: 520px) { .game { grid-template-rows: 36px minmax(0, 1fr) minmax(226px, 50svh); max-width: 100%; width: 100%; padding: 5px 0 0; } .topbar { min-height: 32px; padding-bottom: 4px; } .top-reset { border-radius: 8px; font-size: .78rem; padding: 0 10px; } .keyboard { gap: 0; } }
+    @media (max-height: 700px) { .game { grid-template-rows: 34px minmax(0, 1fr) minmax(206px, 50svh); padding-top: 4px; } .topbar { min-height: 30px; padding-bottom: 4px; } .top-reset { font-size: .74rem; padding: 0 9px; } }
+    @media (max-height: 600px) { .game { grid-template-rows: 32px minmax(0, 1fr) minmax(186px, 50svh); } .topbar { min-height: 28px; } .top-reset { font-size: .7rem; padding: 0 8px; } }
+    /* end-restart-top-keyboard-fill */
+
   </style>
 </head>
 <body>
   <main class="game" aria-label="二重素因数分解">
-    <header class="topbar"><div class="brand" aria-hidden="true"></div><div class="timer" aria-live="polite"><strong id="timer">0.00</strong><span>秒</span></div></header>
+    <header class="topbar"><button class="reset top-reset" id="resetButton" type="button">restart</button><div class="timer" aria-live="polite"><strong id="timer">0.00</strong><span>秒</span></div></header>
     <section class="stage"><section class="numbers" id="numbers" aria-label="ネクスト1"><div class="current-frame" aria-hidden="true"></div></section><section class="panel"><div class="status" id="status">第1問 / 30</div><div class="input empty" id="input" aria-live="polite">入力</div><div class="feedback" id="feedback" aria-live="polite">素因数を入力</div></section></section>
     <section class="keyboard" aria-label="素因数分解ジェネラルキーボード"><button class="key" data-key="7" type="button">7</button><button class="key" data-key="8" type="button">8</button><button class="key" data-key="9" type="button">9</button><button class="key" data-key="4" type="button">4</button><button class="key" data-key="5" type="button">5</button><button class="key" data-key="6" type="button">6</button><button class="key" data-key="1" type="button">1</button><button class="key" data-key="2" type="button">2</button><button class="key" data-key="3" type="button">3</button><button class="key back" data-key="B" type="button">B</button><button class="key" data-key="0" type="button">0</button><button class="key clear" data-key="AC" type="button">AC</button></section>
-    <button class="reset" id="resetButton" type="button">restart</button>
   </main>
   <div class="start-overlay show" id="startOverlay" role="dialog" aria-modal="true" aria-labelledby="startTitle">
     <button class="rules-tab" id="rulesTab" type="button">ルール</button>
